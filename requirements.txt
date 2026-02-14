@@ -1,0 +1,14 @@
+anthropic==0.39.0
+pydantic==2.9.2
+pydantic-settings==2.6.1
+supabase==2.9.1
+praw==7.8.1
+discord.py==2.4.0
+python-telegram-bot==21.7
+sendgrid==6.11.0
+selenium==4.27.1
+httpx==0.27.2
+schedule==1.2.2
+python-dotenv==1.0.1
+structlog==24.4.0
+tenacity==9.0.0

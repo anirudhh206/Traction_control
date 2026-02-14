@@ -1,0 +1,32 @@
+# RepEscrow AI Agents - Python Dependencies
+# Install: pip install -r requirements.txt
+
+# Core
+anthropic>=0.39.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Database
+supabase>=2.3.0
+
+# Logging
+structlog>=24.1.0
+
+# HTTP
+requests>=2.31.0
+tenacity>=8.2.0
+
+# Discord
+discord.py>=2.3.0
+
+# Telegram
+python-telegram-bot>=21.0
+
+# Email
+sendgrid>=6.11.0
+
+# Reddit (deprioritized - API approval pending)
+praw>=7.7.0
+
+# Twitter (skipped for now)
+# tweepy>=4.14.0
