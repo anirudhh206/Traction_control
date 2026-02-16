@@ -1,8 +1,10 @@
+//this is constants.ts
+
 import { PublicKey } from "@solana/web3.js";
 
 // Program ID (update after deploying to devnet)
 export const PROGRAM_ID = new PublicKey(
-  "REPescrowXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  "4BswyWR7jq8M5bW3qocQkphxsk1wUm791u9pfV5WgFAn"
 );
 
 // RPC endpoints

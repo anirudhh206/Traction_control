@@ -1,0 +1,1289 @@
+{
+  "address": "DQNBgzbhF8WCEcMtVZgG9gDbG2xa7jnNaVnY3vQrdaL9",
+  "metadata": {
+    "name": "repescrow",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "create_escrow",
+      "docs": [
+        "Create a new escrow between buyer and vendor"
+      ],
+      "discriminator": [
+        253,
+        215,
+        165,
+        116,
+        36,
+        108,
+        68,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vendor"
+        },
+        {
+          "name": "vendor_profile",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vendor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "buyer"
+              },
+              {
+                "kind": "account",
+                "path": "vendor"
+              },
+              {
+                "kind": "account",
+                "path": "platform_config.total_escrows",
+                "account": "PlatformConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "milestone_count",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "create_profile",
+      "docs": [
+        "Create a user profile (required before transacting)"
+      ],
+      "discriminator": [
+        225,
+        205,
+        234,
+        143,
+        17,
+        186,
+        50,
+        220
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "fund_escrow",
+      "docs": [
+        "Fund an existing escrow (buyer deposits SOL)"
+      ],
+      "discriminator": [
+        155,
+        18,
+        218,
+        141,
+        182,
+        213,
+        69,
+        201
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_platform",
+      "docs": [
+        "Initialize the platform config (one-time admin setup)"
+      ],
+      "discriminator": [
+        119,
+        201,
+        101,
+        45,
+        75,
+        122,
+        89,
+        3
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "treasury"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "min_escrow_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "open_dispute",
+      "docs": [
+        "Open a dispute on an active escrow"
+      ],
+      "discriminator": [
+        137,
+        25,
+        99,
+        119,
+        23,
+        223,
+        161,
+        42
+      ],
+      "accounts": [
+        {
+          "name": "initiator",
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": {
+            "defined": {
+              "name": "DisputeReason"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "refund",
+      "docs": [
+        "Vendor-initiated refund to buyer"
+      ],
+      "discriminator": [
+        2,
+        96,
+        183,
+        251,
+        63,
+        208,
+        46,
+        46
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "writable": true
+        },
+        {
+          "name": "vendor",
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "vendor_profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vendor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "release_payment",
+      "docs": [
+        "Release payment to vendor (after hold period)"
+      ],
+      "discriminator": [
+        24,
+        34,
+        191,
+        86,
+        145,
+        160,
+        183,
+        233
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vendor",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "vendor_profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vendor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "buyer_profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "buyer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "treasury",
+          "writable": true
+        },
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resolve_dispute",
+      "docs": [
+        "Admin resolves a dispute with a percentage split"
+      ],
+      "discriminator": [
+        231,
+        6,
+        202,
+        6,
+        96,
+        103,
+        12,
+        230
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "docs": [
+            "Platform admin acting as arbitrator"
+          ],
+          "signer": true
+        },
+        {
+          "name": "buyer",
+          "writable": true
+        },
+        {
+          "name": "vendor",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "vendor_profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vendor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "buyer_profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "buyer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "treasury",
+          "writable": true
+        },
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vendor_pct",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "stake",
+      "docs": [
+        "Stake SOL for reputation boost"
+      ],
+      "discriminator": [
+        206,
+        176,
+        202,
+        18,
+        200,
+        209,
+        179,
+        108
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "submit_work",
+      "docs": [
+        "Vendor submits work, starting the hold period"
+      ],
+      "discriminator": [
+        158,
+        80,
+        101,
+        51,
+        114,
+        130,
+        101,
+        253
+      ],
+      "accounts": [
+        {
+          "name": "vendor",
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "unstake",
+      "docs": [
+        "Unstake SOL"
+      ],
+      "discriminator": [
+        90,
+        95,
+        107,
+        42,
+        205,
+        124,
+        50,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Escrow",
+      "discriminator": [
+        31,
+        213,
+        123,
+        187,
+        186,
+        22,
+        218,
+        155
+      ]
+    },
+    {
+      "name": "PlatformConfig",
+      "discriminator": [
+        160,
+        78,
+        128,
+        0,
+        248,
+        83,
+        230,
+        160
+      ]
+    },
+    {
+      "name": "UserProfile",
+      "discriminator": [
+        32,
+        37,
+        119,
+        205,
+        179,
+        180,
+        13,
+        194
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "You are not authorized to perform this action"
+    },
+    {
+      "code": 6001,
+      "name": "PlatformPaused",
+      "msg": "The platform is currently paused"
+    },
+    {
+      "code": 6002,
+      "name": "AmountTooLow",
+      "msg": "Escrow amount is below the minimum"
+    },
+    {
+      "code": 6003,
+      "name": "TooManyMilestones",
+      "msg": "Too many milestones (max 10)"
+    },
+    {
+      "code": 6004,
+      "name": "SelfEscrow",
+      "msg": "Cannot create escrow with yourself"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidEscrowStatus",
+      "msg": "Invalid escrow status for this operation"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidVendor",
+      "msg": "Invalid vendor for this escrow"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidBuyer",
+      "msg": "Invalid buyer for this escrow"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidTreasury",
+      "msg": "Invalid treasury account"
+    },
+    {
+      "code": 6009,
+      "name": "HoldPeriodActive",
+      "msg": "Hold period has not elapsed yet"
+    },
+    {
+      "code": 6010,
+      "name": "NothingToRelease",
+      "msg": "Nothing to release"
+    },
+    {
+      "code": 6011,
+      "name": "NothingToRefund",
+      "msg": "Nothing to refund"
+    },
+    {
+      "code": 6012,
+      "name": "DisputeAlreadyOpen",
+      "msg": "A dispute is already open on this escrow"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidPercentage",
+      "msg": "Invalid percentage (must be 0-100)"
+    },
+    {
+      "code": 6014,
+      "name": "InsufficientStake",
+      "msg": "Insufficient staked amount"
+    }
+  ],
+  "types": [
+    {
+      "name": "Dispute",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initiated_by",
+            "docs": [
+              "Who initiated the dispute"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "docs": [
+              "Reason (short description hash or enum)"
+            ],
+            "type": {
+              "defined": {
+                "name": "DisputeReason"
+              }
+            }
+          },
+          {
+            "name": "arbitrator",
+            "docs": [
+              "Arbitrator assigned"
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "resolution_vendor_pct",
+            "docs": [
+              "Resolution: percentage to vendor (0-100, rest goes to buyer)"
+            ],
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Timestamp of dispute creation"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "resolved_at",
+            "docs": [
+              "Timestamp of resolution"
+            ],
+            "type": {
+              "option": "i64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeReason",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "WorkNotDelivered"
+          },
+          {
+            "name": "QualityIssue"
+          },
+          {
+            "name": "ScopeDisagreement"
+          },
+          {
+            "name": "PaymentDispute"
+          },
+          {
+            "name": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Escrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "buyer",
+            "docs": [
+              "Buyer (depositor) public key"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "vendor",
+            "docs": [
+              "Vendor (service provider) public key"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Total escrow amount in lamports (or token smallest unit)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "released_amount",
+            "docs": [
+              "Amount already released to vendor"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fee_bps",
+            "docs": [
+              "Fee percentage in basis points (50 = 0.5%, 250 = 2.5%)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Escrow status"
+            ],
+            "type": {
+              "defined": {
+                "name": "EscrowStatus"
+              }
+            }
+          },
+          {
+            "name": "milestone_count",
+            "docs": [
+              "Number of milestones (0 = single payment)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "current_milestone",
+            "docs": [
+              "Current milestone index (0-based)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "hold_period",
+            "docs": [
+              "Hold period in seconds (based on vendor's tier)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Timestamp when escrow was created"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "release_after",
+            "docs": [
+              "Timestamp when payment can be released (after hold period)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "dispute",
+            "docs": [
+              "Dispute details (if any)"
+            ],
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "Dispute"
+                }
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed for PDA"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EscrowStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Created"
+          },
+          {
+            "name": "Funded"
+          },
+          {
+            "name": "Submitted"
+          },
+          {
+            "name": "Released"
+          },
+          {
+            "name": "Refunded"
+          },
+          {
+            "name": "Disputed"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlatformConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "docs": [
+              "Platform admin"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "docs": [
+              "Treasury wallet for fees"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "total_escrows",
+            "docs": [
+              "Total escrows created"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_volume",
+            "docs": [
+              "Total volume processed"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "active",
+            "docs": [
+              "Whether new escrows are enabled"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "min_escrow_amount",
+            "docs": [
+              "Minimum escrow amount (lamports)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserProfile",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "User's wallet"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "fair_score",
+            "docs": [
+              "FairScore (stored as basis points: 450 = 4.50)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "buyer_tx_count",
+            "docs": [
+              "Total completed transactions as buyer"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "vendor_tx_count",
+            "docs": [
+              "Total completed transactions as vendor"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "dispute_count",
+            "docs": [
+              "Total dispute count"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "disputes_won",
+            "docs": [
+              "Disputes won"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "total_volume",
+            "docs": [
+              "Total volume transacted (in lamports)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "staked_amount",
+            "docs": [
+              "Staked amount for reputation boost"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Timestamp of profile creation"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "docs": [
+              "Last updated timestamp"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed for PDA"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}
