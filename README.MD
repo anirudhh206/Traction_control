@@ -539,7 +539,6 @@ Response:
 
 
 
-## 🗺️ Roadmap
 
 ### v1.0 (Current)
 - ✅ 7 agent types
