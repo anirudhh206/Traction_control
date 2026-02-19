@@ -1,223 +1,212 @@
-"""Claude API Client with Intelligent Model Selection."""
+"""
+AI Client — Google Gemini API Wrapper.
 
-import time
-from typing import Literal
+Works with both old (google.generativeai) and new (google.genai) packages.
+Automatically detects which one is installed.
+"""
+
+from __future__ import annotations
+
 from enum import Enum
+from typing import Optional
+import warnings
 
-import anthropic
-from anthropic import Anthropic, APIError, RateLimitError
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from config import get_settings
 from logging_config import get_logger
 
+__all__ = ["GeminiClient", "TaskComplexity", "get_claude"]
+
 logger = get_logger(__name__)
+
+# Try to import the new package first, fall back to old
+try:
+    from google import genai
+    from google.genai import types
+    USE_NEW_API = True
+    logger.info("using_new_gemini_api", package="google.genai")
+except ImportError:
+    try:
+        import google.generativeai as genai
+        USE_NEW_API = False
+        # Suppress the deprecation warning
+        warnings.filterwarnings('ignore', category=FutureWarning, module='google.generativeai')
+        logger.info("using_old_gemini_api", package="google.generativeai")
+    except ImportError:
+        raise ImportError(
+            "Neither google.genai nor google.generativeai found. "
+            "Install with: pip install google-generativeai"
+        )
 
 
 class TaskComplexity(str, Enum):
-    """Task complexity levels for model selection."""
+    """Task complexity levels for appropriate model selection."""
+    
     SIMPLE = "simple"
     MEDIUM = "medium"
     COMPLEX = "complex"
 
 
-class ClaudeModel(str, Enum):
-    """Available Claude models."""
-    HAIKU = "claude-haiku-4-5-20251001"
-    SONNET = "claude-sonnet-4-5-20250929"
-
-
-class ClaudeClient:
-    """Production-ready Claude API client."""
+class GeminiClient:
+    """
+    Type-safe client for Google Gemini API.
+    
+    Automatically selects models based on task complexity:
+    - Simple/Medium → Gemini 1.5 Flash (fast, free)
+    - Complex → Gemini 1.5 Pro (powerful)
+    """
+    
+    _MODEL_MAP = {
+        TaskComplexity.SIMPLE: "gemini-1.5-flash",
+        TaskComplexity.MEDIUM: "gemini-1.5-flash",
+        TaskComplexity.COMPLEX: "gemini-1.5-pro",
+    }
     
     def __init__(self) -> None:
-        """Initialize Claude API client."""
+        """Initialize Gemini client."""
         settings = get_settings()
-        self._client = Anthropic(api_key=settings.anthropic_api_key)
-        self._total_input_tokens = 0
-        self._total_output_tokens = 0
-        self._request_count = 0
-        logger.info("claude_client_initialized")
-    
-    def _get_model(self, complexity: TaskComplexity) -> ClaudeModel:
-        """Select model based on task complexity."""
-        if complexity == TaskComplexity.COMPLEX:
-            return ClaudeModel.SONNET
-        return ClaudeModel.HAIKU
+        
+        # Support both gemini_api_key and anthropic_api_key
+        api_key = (
+            getattr(settings, 'gemini_api_key', None) or 
+            getattr(settings, 'anthropic_api_key', None)
+        )
+        
+        if not api_key:
+            raise ValueError(
+                "API key not found. Add to .env:\n"
+                "GEMINI_API_KEY=your-key-here"
+            )
+        
+        self.api_key = api_key
+        
+        # Initialize based on which package is available
+        if USE_NEW_API:
+            self.client = genai.Client(api_key=api_key)
+        else:
+            genai.configure(api_key=api_key)
+            self.client = None  # Old API doesn't use client object
+        
+        logger.info("gemini_client_initialized", use_new_api=USE_NEW_API)
     
     @retry(
-        retry=retry_if_exception_type((RateLimitError, APIError)),
+        retry=retry_if_exception_type((Exception,)),
         wait=wait_exponential(multiplier=1, min=2, max=60),
         stop=stop_after_attempt(3),
-        reraise=True
+        reraise=True,
     )
-    def _make_request(
-        self,
-        model: ClaudeModel,
-        system: str,
-        messages: list[dict[str, str]],
-        max_tokens: int,
-        temperature: float
-    ) -> anthropic.types.Message:
-        """Make API request with retry logic."""
-        try:
-            response = self._client.messages.create(
-                model=model.value,
-                system=system,
-                messages=messages,
-                max_tokens=max_tokens,
-                temperature=temperature
-            )
-            
-            self._total_input_tokens += response.usage.input_tokens
-            self._total_output_tokens += response.usage.output_tokens
-            self._request_count += 1
-            
-            logger.info(
-                "claude_request_completed",
-                model=model.value,
-                input_tokens=response.usage.input_tokens,
-                output_tokens=response.usage.output_tokens
-            )
-            
-            return response
-            
-        except Exception as e:
-            logger.error("claude_api_error", error=str(e))
-            raise
-    
     def generate(
         self,
         prompt: str,
         complexity: TaskComplexity = TaskComplexity.MEDIUM,
-        system: str | None = None,
-        max_tokens: int = 1000,
-        temperature: float = 1.0
+        max_tokens: Optional[int] = None,
+        temperature: float = 0.7,
+        system_prompt: Optional[str] = None,
     ) -> str:
-        """Generate text using Claude."""
+        """Generate AI response using Gemini."""
         try:
-            model = self._get_model(complexity)
+            model_name = self._MODEL_MAP[complexity]
             
-            if system is None:
-                settings = get_settings()
-                system = f"""You are a helpful AI assistant for {settings.product_name}.
-
-{settings.product_name}: {settings.product_tagline}
-Website: {settings.product_url}
-
-Be concise, helpful, and authentic."""
+            # Build full prompt
+            full_prompt = prompt
+            if system_prompt:
+                full_prompt = f"{system_prompt}\n\n{prompt}"
             
-            response = self._make_request(
-                model=model,
-                system=system,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=max_tokens,
-                temperature=temperature
+            if USE_NEW_API:
+                # New API (google.genai)
+                config = types.GenerateContentConfig(
+                    temperature=temperature,
+                    max_output_tokens=max_tokens or 1024,
+                )
+                
+                response = self.client.models.generate_content(
+                    model=model_name,
+                    contents=full_prompt,
+                    config=config,
+                )
+                
+                text = response.text
+            else:
+                # Old API (google.generativeai)
+                model = genai.GenerativeModel(model_name)
+                
+                generation_config = {
+                    "temperature": temperature,
+                    "top_p": 0.95,
+                    "top_k": 40,
+                }
+                
+                if max_tokens:
+                    generation_config["max_output_tokens"] = max_tokens
+                
+                response = model.generate_content(
+                    full_prompt,
+                    generation_config=generation_config,
+                )
+                
+                text = response.text
+            
+            if not text:
+                raise ValueError("Empty response from Gemini")
+            
+            logger.info(
+                "gemini_generation_success",
+                model=model_name,
+                response_length=len(text),
             )
             
-            text_content = ""
-            for block in response.content:
-                if block.type == "text":
-                    text_content += block.text
-            
-            return text_content.strip()
-            
+            return text.strip()
+        
         except Exception as e:
-            logger.error("claude_generation_failed", error=str(e))
+            logger.error(
+                "gemini_generation_failed",
+                error=str(e),
+                model=self._MODEL_MAP.get(complexity, "unknown"),
+            )
             raise
     
-    def generate_thread(
-        self,
-        topic: str,
-        tweet_count: int = 5,
-        style: Literal["controversial", "educational", "story"] = "educational"
-    ) -> list[str]:
-        """Generate a Twitter thread."""
-        settings = get_settings()
-        
-        prompt = f"""Create a {tweet_count}-tweet Twitter thread about: {topic}
-
-Style: {style}
-
-Product: {settings.product_name} - {settings.product_tagline}
-
-Requirements:
-1. Bold hook (first tweet)
-2. Each tweet ≤280 characters
-3. Natural, conversational tone
-4. Include examples
-5. Soft CTA (last tweet)
-
-Format: Return ONLY numbered tweets 1-{tweet_count}."""
-        
-        response = self.generate(
-            prompt=prompt,
-            complexity=TaskComplexity.COMPLEX,
-            max_tokens=1500,
-            temperature=0.9
-        )
-        
-        tweets = []
-        for line in response.split('\n'):
-            line = line.strip()
-            if line and any(line.startswith(f"{i}.") or line.startswith(f"{i})") for i in range(1, 11)):
-                tweet = line.split('.', 1)[1].strip() if '.' in line else line.split(')', 1)[1].strip()
-                if len(tweet) <= 280 and tweet:
-                    tweets.append(tweet)
-        
-        return tweets[:tweet_count]
-    
-    def generate_reply(self, original_message: str) -> str:
-        """Generate a helpful reply."""
-        settings = get_settings()
-        
-        prompt = f"""Reply to: "{original_message}"
-
-Product (mention only if relevant): {settings.product_name}
-
-Requirements:
-1. Be genuinely helpful
-2. Max 280 characters
-3. Natural tone
-4. No hard selling
-
-Return ONLY the reply."""
-        
-        reply = self.generate(
+    def generate_simple(self, prompt: str, max_tokens: int = 200) -> str:
+        """Quick, short responses."""
+        return self.generate(
             prompt=prompt,
             complexity=TaskComplexity.SIMPLE,
-            max_tokens=200,
-            temperature=0.7
+            max_tokens=max_tokens,
+            temperature=0.6,
         )
-        
-        if len(reply) > 280:
-            reply = reply[:277] + "..."
-        
-        return reply
     
-    def get_usage_stats(self) -> dict[str, int | float]:
-        """Get API usage statistics."""
-        haiku_input_cost = 0.25 / 1_000_000
-        haiku_output_cost = 1.25 / 1_000_000
-        
-        input_cost = self._total_input_tokens * haiku_input_cost
-        output_cost = self._total_output_tokens * haiku_output_cost
-        total_cost = input_cost + output_cost
-        
-        return {
-            'total_requests': self._request_count,
-            'total_input_tokens': self._total_input_tokens,
-            'total_output_tokens': self._total_output_tokens,
-            'estimated_cost_usd': round(total_cost, 4)
-        }
+    def generate_creative(self, prompt: str, max_tokens: int = 500) -> str:
+        """Creative content with higher temperature."""
+        return self.generate(
+            prompt=prompt,
+            complexity=TaskComplexity.MEDIUM,
+            max_tokens=max_tokens,
+            temperature=0.9,
+        )
+    
+    def __repr__(self) -> str:
+        api_type = "new" if USE_NEW_API else "old"
+        return f"<GeminiClient api={api_type}>"
 
 
-_claude_client: ClaudeClient | None = None
+# Backward compatibility
+ClaudeClient = GeminiClient
+
+# Global singleton
+_client: Optional[GeminiClient] = None
 
 
-def get_claude() -> ClaudeClient:
-    """Get Claude API client (singleton)."""
-    global _claude_client
-    if _claude_client is None:
-        _claude_client = ClaudeClient()
-    return _claude_client
+def get_claude() -> GeminiClient:
+    """
+    Get the global Gemini client instance (singleton).
+    Named get_claude() for backward compatibility with existing code.
+    """
+    global _client
+    if _client is None:
+        _client = GeminiClient()
+    return _client
