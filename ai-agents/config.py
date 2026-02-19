@@ -15,8 +15,11 @@ class Settings(BaseSettings):
         extra='ignore'
     )
     
-    # ANTHROPIC
-    anthropic_api_key: str = Field(..., min_length=1)
+    # AI API (Gemini - replacing Anthropic Claude)
+    gemini_api_key: Optional[str] = Field(default=None)
+    
+    # ANTHROPIC (legacy - keeping for backward compatibility)
+    anthropic_api_key: Optional[str] = Field(default=None)
     
     # SUPABASE
     supabase_url: str = Field(..., min_length=1)
