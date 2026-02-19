@@ -537,22 +537,7 @@ Response:
 | **SendGrid** | $20/month | For 1,500 emails/day |
 | **TOTAL** | **~$150/month** | At scale |
 
-### ROI Calculation
 
-**Scenario:** Launching a new Web3 product
-
-- **Manual effort:** 40 hours/week engaging across platforms
-- **Hourly rate:** $50/hour (conservative for Web3 dev)
-- **Monthly cost:** 160 hours × $50 = **$8,000**
-
-**With Traction Control:**
-- **Setup time:** 4 hours
-- **Monthly cost:** $0-150 (depending on scale)
-- **Monthly savings:** **$7,850+**
-
-**Break-even:** Immediate (free tier)
-
----
 
 ## 🗺️ Roadmap
 
