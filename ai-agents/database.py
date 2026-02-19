@@ -1,7 +1,8 @@
 """Database Layer - Supabase Client with Type Safety."""
 
 from typing import Any
-from datetime import datetime, date
+from datetime import datetime
+from datetime import date as date_type  # Renamed import to avoid conflict
 from enum import Enum
 
 from supabase import create_client, Client
@@ -67,7 +68,7 @@ class Conversation(BaseModel):
 class DailyMetrics(BaseModel):
     """Daily performance metrics."""
     id: int | None = None
-    date: date = Field(default_factory=date.today)
+    metric_date: date_type = Field(default_factory=date_type.today)  # Renamed from 'date' to 'metric_date'
     platform: Platform
     impressions: int = 0
     engagements: int = 0
@@ -167,18 +168,18 @@ class DatabaseClient:
                 raise Exception("Failed to record metrics")
             
             created = DailyMetrics(**result.data[0])
-            logger.info("metrics_recorded", date=str(created.date), platform=created.platform)
+            logger.info("metrics_recorded", date=str(created.metric_date), platform=created.platform)
             return created
         except Exception as e:
             logger.error("metrics_recording_failed", error=str(e))
             raise
     
-    def get_total_signups(self, start_date: date | None = None) -> int:
+    def get_total_signups(self, start_date: date_type | None = None) -> int:
         """Get total signups across all platforms."""
         try:
             query = self._client.table('metrics').select('signups')
             if start_date:
-                query = query.gte('date', str(start_date))
+                query = query.gte('metric_date', str(start_date))
             result = query.execute()
             return sum(m['signups'] for m in result.data)
         except Exception as e:
