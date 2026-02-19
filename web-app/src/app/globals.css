@@ -38,3 +38,43 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #4b5563;
 }
+
+/* Wallet Button Styles */
+.wallet-adapter-button {
+  background-color: #512da8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.wallet-adapter-button:hover {
+  background-color: #673ab7;
+}
+
+.wallet-adapter-button-trigger {
+  background-color: #14f195 !important;
+  color: #1a1a1a !important;
+}
+
+.wallet-adapter-dropdown {
+  background-color: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+.wallet-adapter-dropdown-list {
+  background-color: #1f1f1f;
+}
+
+.wallet-adapter-dropdown-list-item {
+  color: white;
+  padding: 12px 16px;
+}
+
+.wallet-adapter-dropdown-list-item:hover {
+  background-color: #333;
+}

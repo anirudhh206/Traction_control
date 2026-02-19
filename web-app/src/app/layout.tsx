@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+// import { Inter } from "next/font/google";
 import "./globals.css";
 import WalletProvider from "@/components/layout/WalletProvider";
 import Navbar from "@/components/layout/Navbar";
 
-const inter = Inter({ subsets: ["latin"] });
+// const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "RepEscrow - Reputation-Weighted Escrow on Solana",
@@ -25,7 +25,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body> {/* ← Remove {inter.className} */}
         <WalletProvider>
           <Navbar />
           <main className="min-h-screen">{children}</main>
@@ -33,4 +33,5 @@ export default function RootLayout({
       </body>
     </html>
   );
+
 }
