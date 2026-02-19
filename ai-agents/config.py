@@ -1,7 +1,7 @@
 """Configuration Management with Type Safety."""
 
-from typing import Literal
-from pydantic import Field, HttpUrl
+from typing import Literal, Optional
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,27 +23,27 @@ class Settings(BaseSettings):
     supabase_key: str = Field(..., min_length=1)
     
     # REDDIT
-    reddit_client_id: str = Field(..., min_length=1)
-    reddit_client_secret: str = Field(..., min_length=1)
-    reddit_username: str = Field(..., min_length=1)
-    reddit_password: str = Field(..., min_length=1)
+    reddit_client_id: Optional[str] = Field(default=None)
+    reddit_client_secret: Optional[str] = Field(default=None)
+    reddit_username: Optional[str] = Field(default=None)
+    reddit_password: Optional[str] = Field(default=None)
     reddit_user_agent: str = Field(default="RepEscrow:v1.0.0")
     
     # DISCORD
-    discord_bot_token: str = Field(..., min_length=1)
+    discord_bot_token: Optional[str] = Field(default=None)
     
     # TELEGRAM
-    telegram_bot_token: str = Field(..., min_length=1)
+    telegram_bot_token: Optional[str] = Field(default=None)
     
-    # SENDGRID
-    sendgrid_api_key: str = Field(..., min_length=1)
-    from_email: str = Field(default="hello@repescrow.xyz")
-    from_name: str = Field(default="RepEscrow Team")
+    # SENDGRID (renamed to avoid conflicts)
+    sendgrid_api_key: Optional[str] = Field(default=None)
+    sendgrid_from_email: str = Field(default="hello@repescrow.xyz")
+    sendgrid_from_name: str = Field(default="RepEscrow Team")
     
     # TWITTER
-    twitter_username: str = Field(..., min_length=1)
-    twitter_password: str = Field(..., min_length=1)
-    twitter_email: str = Field(..., min_length=1)
+    twitter_username: Optional[str] = Field(default=None)
+    twitter_password: Optional[str] = Field(default=None)
+    twitter_email: Optional[str] = Field(default=None)
     
     # PRODUCT
     product_name: str = Field(default="RepEscrow")
