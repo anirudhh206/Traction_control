@@ -2,7 +2,7 @@
 
 > **AI-Powered Multi-Channel Growth Engine for Web3 Products**
 
-An autonomous agent system that generates user signups and traction across 7+ platforms simultaneously. Built for [RepEscrow](https://repescrow.xyz), but configurable for any product.
+An autonomous agent system that generates user signups and traction across 7+ platforms simultaneously.Configurable for any product.
 
 
 ---
